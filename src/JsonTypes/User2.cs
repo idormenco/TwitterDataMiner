@@ -13,16 +13,16 @@ namespace TwitterDataMiner.JsonTypes
         public string url { get; set; }
         public Entities4 entities { get; set; }
         public bool @protected { get; set; }
-        public int followers_count { get; set; }
-        public int friends_count { get; set; }
-        public int listed_count { get; set; }
+        public long followers_count { get; set; }
+        public long friends_count { get; set; }
+        public long listed_count { get; set; }
         public string created_at { get; set; }
-        public int favourites_count { get; set; }
-        public int? utc_offset { get; set; }
+        public long favourites_count { get; set; }
+        public long? utc_offset { get; set; }
         public string time_zone { get; set; }
         public bool geo_enabled { get; set; }
         public bool verified { get; set; }
-        public int statuses_count { get; set; }
+        public long statuses_count { get; set; }
         public string lang { get; set; }
         public bool contributors_enabled { get; set; }
         public bool is_translator { get; set; }

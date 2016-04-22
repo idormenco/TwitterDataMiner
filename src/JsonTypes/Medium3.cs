@@ -4,9 +4,9 @@ namespace TwitterDataMiner.JsonTypes
 {
     public class Medium3
     {
-        public object id { get; set; }
+        public long id { get; set; }
         public string id_str { get; set; }
-        public List<int> indices { get; set; }
+        public List<long> indices { get; set; }
         public string media_url { get; set; }
         public string media_url_https { get; set; }
         public string url { get; set; }

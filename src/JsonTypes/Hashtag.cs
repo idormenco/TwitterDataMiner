@@ -6,6 +6,6 @@ namespace TwitterDataMiner.JsonTypes
     public class Hashtag
     {
         public string text { get; set; }
-        public List<int> indices { get; set; }
+        public List<long> indices { get; set; }
     }
 }

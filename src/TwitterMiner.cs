@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net;
 using Newtonsoft.Json;
 using TwitterDataMiner.DTO;
@@ -49,8 +50,8 @@ namespace TwitterDataMiner
 
         private string GetBase64AuthorizationData(string keySecretConcatenated)
         {
-            var plainTextBytes = System.Text.Encoding.UTF8.GetBytes(keySecretConcatenated);
-            string base64 = System.Convert.ToBase64String(plainTextBytes);
+            var plalongextBytes = System.Text.Encoding.UTF8.GetBytes(keySecretConcatenated);
+            string base64 = System.Convert.ToBase64String(plalongextBytes);
             return $"Basic {base64}";
         }
 
@@ -72,10 +73,15 @@ namespace TwitterDataMiner
             return JsonConvert.DeserializeObject<RootObject>(json);
         }
 
+        public IList<string> MineTweets(ITwitterMinerQuery minerQuery, long numberOfTweets)
+        {
+            throw new NotImplementedException();
+        }
+
         private string GetQueryResponse(ITwitterAuthentificationResponse oAuthCredentials, string query)
         {
             string json;
-            HttpWebRequest apiRequest = (HttpWebRequest) WebRequest.Create(string.Concat(TwitterSearchUrl, query));
+            HttpWebRequest apiRequest = (HttpWebRequest)WebRequest.Create(string.Concat(TwitterSearchUrl, query));
             var authorizationData = $"{oAuthCredentials.TokenType} {oAuthCredentials.AccessToken}";
             apiRequest.Headers.Add("Authorization", authorizationData);
             apiRequest.Method = "Get";
@@ -89,14 +95,58 @@ namespace TwitterDataMiner
             return json;
         }
 
-        public IList<string> MineTweets(ITwitterMinerQuery minerQuery, int numberOfTweets)
+        public IList<string> MineTweets(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null)
         {
-            throw new NotImplementedException();
+            long max_id = -1;
+            long numberOfTweetsProcessed = 0;
+            List<string> minedTwits = new List<string>();
+            List<long> lsl= new List<long>();
+            while (numberOfTweetsProcessed < numberOfTweets)
+            {
+                string twitterResult;
+                if (max_id <= 0)
+                {
+                    if (!since_id.HasValue)
+                    {
+                        twitterResult = SearchByQuery(twitterAuthentificationResponse, minerQuery.Build());
+                    }
+                    else
+                    {
+                        var query = minerQuery.BuildWithSinceId(since_id.Value);
+                        twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
+                    }
+                }
+                else
+                {
+                    if (!since_id.HasValue)
+                    {
+                        var query = minerQuery.BuildWithMaxId(max_id - 1);
+                        twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
+                    }
+                    else
+                    {
+                        var query = minerQuery.BuildWithMaxIdAndSinceId(max_id - 1, since_id.Value);
+                        twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
+                    }
+                }
+                var deserializeObject = JsonConvert.DeserializeObject<RootObject>(twitterResult);
+                if (deserializeObject.search_metadata.count < 0)
+                {
+                    return minedTwits;
+                }
+                numberOfTweetsProcessed += deserializeObject.search_metadata.count;
+                max_id = deserializeObject.statuses.Last().id;
+                minedTwits.Add(twitterResult);
+            }
+
+            return minedTwits;
         }
 
-        public IList<RootObject> MineTweetsDeserialized(ITwitterMinerQuery minerQuery, int numberOfTweets)
+        public IList<RootObject> MineTweetsDeserialized(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null)
         {
-            throw new NotImplementedException();
+            return
+                MineTweets(twitterAuthentificationResponse, minerQuery, numberOfTweets)
+                    .Select(JsonConvert.DeserializeObject<RootObject>).ToList();
         }
     }
 }

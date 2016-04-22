@@ -11,7 +11,7 @@ namespace TwitterDataMiner
         ITwitterAuthentificationResponse Authentificate(IOAuthCredentials oAuthCredentials);
         string SearchByQuery(ITwitterAuthentificationResponse oAuthCredentials, string query);
         RootObject SearchByQueryDeserialized(ITwitterAuthentificationResponse oAuthCredentials, string query);
-        IList<string> MineTweets(ITwitterMinerQuery minerQuery, int numberOfTweets);
-        IList<RootObject> MineTweetsDeserialized(ITwitterMinerQuery minerQuery, int numberOfTweets);
+        IList<string> MineTweets(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null);
+        IList<RootObject> MineTweetsDeserialized(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null);
     }
 }

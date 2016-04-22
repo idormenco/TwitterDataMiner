@@ -2,7 +2,7 @@ namespace TwitterDataMiner.JsonTypes
 {
     public class User
     {
-        public string id { get; set; }
+        public long id { get; set; }
         public string id_str { get; set; }
         public string name { get; set; }
         public string screen_name { get; set; }
@@ -11,16 +11,16 @@ namespace TwitterDataMiner.JsonTypes
         public string url { get; set; }
         public Entities2 entities { get; set; }
         public bool @protected { get; set; }
-        public int followers_count { get; set; }
-        public int friends_count { get; set; }
-        public int listed_count { get; set; }
+        public long followers_count { get; set; }
+        public long friends_count { get; set; }
+        public long listed_count { get; set; }
         public string created_at { get; set; }
-        public int favourites_count { get; set; }
-        public int? utc_offset { get; set; }
+        public long favourites_count { get; set; }
+        public long? utc_offset { get; set; }
         public string time_zone { get; set; }
         public bool geo_enabled { get; set; }
         public bool verified { get; set; }
-        public int statuses_count { get; set; }
+        public long statuses_count { get; set; }
         public string lang { get; set; }
         public bool contributors_enabled { get; set; }
         public bool is_translator { get; set; }
