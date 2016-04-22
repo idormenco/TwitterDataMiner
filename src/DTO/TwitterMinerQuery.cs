@@ -4,6 +4,7 @@ namespace TwitterDataMiner.DTO
     {
         const string since_id_str = "&since_id=";
         const string max_id_str = "&max_id=";
+        const string count_str = "&count=100";
         public string TwitterQuery { get; set; }
         public string Build()
         {
@@ -12,17 +13,17 @@ namespace TwitterDataMiner.DTO
 
         public string BuildWithSinceId(long sinceId)
         {
-            return string.Concat(TwitterQuery, since_id_str, sinceId);
+            return string.Concat(TwitterQuery, since_id_str, sinceId, count_str);
         }
 
         public string BuildWithMaxId(long maxId)
         {
-            return string.Concat(TwitterQuery, max_id_str, maxId);
+            return string.Concat(TwitterQuery, max_id_str, maxId, count_str);
         }
 
         public string BuildWithMaxIdAndSinceId(long maxId, long sinceId)
         {
-            return string.Concat(TwitterQuery, max_id_str, maxId, since_id_str, sinceId);
+            return string.Concat(TwitterQuery, max_id_str, maxId, since_id_str, sinceId, count_str);
         }
     }
 }

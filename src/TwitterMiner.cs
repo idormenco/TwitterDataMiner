@@ -130,7 +130,7 @@ namespace TwitterDataMiner
                     }
                 }
                 var deserializeObject = JsonConvert.DeserializeObject<RootObject>(twitterResult);
-                if (deserializeObject.search_metadata.count < 0)
+                if (deserializeObject.statuses.Count == 0)
                 {
                     return minedTwits;
                 }
