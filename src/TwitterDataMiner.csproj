@@ -9,7 +9,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>TwitterDataMiner</RootNamespace>
     <AssemblyName>TwitterDataMiner</AssemblyName>
-    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -34,7 +34,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>packages\Newtonsoft.Json.8.0.3\lib\net40\Newtonsoft.Json.dll</HintPath>
+      <HintPath>packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -46,8 +46,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="DTO\AttitudeType.cs" />
+    <Compile Include="DTO\Coordinates.cs" />
+    <Compile Include="DTO\FilterType.cs" />
     <Compile Include="DTO\IOAuthCredentials.cs" />
     <Compile Include="DTO\ITwitterAuthentificationResponse.cs" />
+    <Compile Include="DTO\LanguageEnum.cs" />
     <Compile Include="IQueryBuilder.cs" />
     <Compile Include="ITwitterMiner.cs" />
     <Compile Include="DTO\ITwitterMinerQuery.cs" />

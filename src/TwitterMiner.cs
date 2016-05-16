@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -73,12 +74,6 @@ namespace TwitterDataMiner
             var json = GetQueryResponse(oAuthCredentials, query);
             return JsonConvert.DeserializeObject<T>(json);
         }
-
-        public IList<string> MineTweets(ITwitterMinerQuery minerQuery, long numberOfTweets)
-        {
-            throw new NotImplementedException();
-        }
-
         private string GetQueryResponse(ITwitterAuthentificationResponse oAuthCredentials, string query)
         {
             string json;
@@ -96,37 +91,36 @@ namespace TwitterDataMiner
             return json;
         }
 
-        public IList<string> MineTweets(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null)
+        public IList<string> MineTweets(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? sinceId = null)
         {
             long max_id = -1;
             long numberOfTweetsProcessed = 0;
             List<string> minedTwits = new List<string>();
-            List<long> lsl = new List<long>();
             while (numberOfTweetsProcessed < numberOfTweets)
             {
                 string twitterResult;
                 if (max_id <= 0)
                 {
-                    if (!since_id.HasValue)
+                    if (!sinceId.HasValue)
                     {
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, minerQuery.Build());
                     }
                     else
                     {
-                        var query = minerQuery.BuildWithSinceId(since_id.Value);
+                        var query = minerQuery.WithSinceId(sinceId.Value).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                 }
                 else
                 {
-                    if (!since_id.HasValue)
+                    if (!sinceId.HasValue)
                     {
-                        var query = minerQuery.BuildWithMaxId(max_id - 1);
+                        var query = minerQuery.WithMaxId(max_id - 1).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                     else
                     {
-                        var query = minerQuery.BuildWithMaxIdAndSinceId(max_id - 1, since_id.Value);
+                        var query = minerQuery.WithMaxId(max_id - 1).WithSinceId(sinceId.Value).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                 }
@@ -143,13 +137,13 @@ namespace TwitterDataMiner
             return minedTwits;
         }
 
-        public void MineTweetsWithProcessor(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, Action<string> jsonProcessor, long? since_id = null)
+        public void MineTweetsWithProcessor(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, Action<string> jsonProcessor, long? sinceId = null)
         {
-            ProcessData(twitterAuthentificationResponse, minerQuery, numberOfTweets, jsonProcessor, since_id, false);
+            ProcessData(twitterAuthentificationResponse, minerQuery, numberOfTweets, jsonProcessor, sinceId, false);
         }
-        public void MineTweetsWithProcessorAsync(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, Action<string> jsonProcessor, long? since_id = null)
+        public void MineTweetsWithProcessorAsync(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, Action<string> jsonProcessor, long? sinceId = null)
         {
-            ProcessData(twitterAuthentificationResponse, minerQuery, numberOfTweets, jsonProcessor, since_id, true);
+            ProcessData(twitterAuthentificationResponse, minerQuery, numberOfTweets, jsonProcessor, sinceId, true);
         }
 
         public void MineTweetsWithAsyncProcessor(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, Action<string> jsonProcessor, long? since_id = null)
@@ -158,46 +152,42 @@ namespace TwitterDataMiner
         }
 
         private void ProcessData(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery,
-            long numberOfTweets, Action<string> jsonProcessor, long? since_id, bool runAsync)
+            long numberOfTweets, Action<string> jsonProcessor, long? sinceId, bool runAsync)
         {
+            Stopwatch stopWatch = new Stopwatch();
             long max_id = -1;
             long numberOfTweetsProcessed = 0;
             int numberOfCalls = 0;
+            stopWatch.Start();
             while (numberOfTweetsProcessed < numberOfTweets)
             {
                 string twitterResult;
                 if (max_id <= 0)
                 {
-                    if (!since_id.HasValue)
+                    if (!sinceId.HasValue)
                     {
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, minerQuery.Build());
                     }
                     else
                     {
-                        var query = minerQuery.BuildWithSinceId(since_id.Value);
+                        var query = minerQuery.WithSinceId(sinceId.Value).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                 }
                 else
                 {
-                    if (!since_id.HasValue)
+                    if (!sinceId.HasValue)
                     {
-                        var query = minerQuery.BuildWithMaxId(max_id - 1);
+                        var query = minerQuery.WithMaxId(max_id - 1).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                     else
                     {
-                        var query = minerQuery.BuildWithMaxIdAndSinceId(max_id - 1, since_id.Value);
+                        var query = minerQuery.WithMaxId(max_id - 1).WithSinceId(sinceId.Value).Build();
                         twitterResult = SearchByQuery(twitterAuthentificationResponse, query);
                     }
                 }
                 numberOfCalls++;
-                if (numberOfCalls >= 440)
-                {
-                    Console.WriteLine("going to sleep for 15 minutes");
-                    Thread.Sleep(15 * 1000 * 60);
-                    numberOfCalls = 0;
-                }
 
                 dynamic deserializeObject = JsonConvert.DeserializeObject(twitterResult);
                 if (deserializeObject.statuses.Count == 0)
@@ -214,10 +204,20 @@ namespace TwitterDataMiner
                 {
                     jsonProcessor(twitterResult);
                 }
+
+                if (numberOfCalls >= 450)
+                {
+                    stopWatch.Stop();
+                    long elapsedMilliseconds = 15L * 1000L * 60L - stopWatch.ElapsedMilliseconds;
+                    Console.WriteLine("going to sleep...");
+                    Thread.Sleep((int) (elapsedMilliseconds>=0L?elapsedMilliseconds:0L));
+                    numberOfCalls = 0;
+                    stopWatch.Restart();
+                }
             }
         }
 
-        public IList<T> MineTweetsDeserialized(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? since_id = null)
+        public IList<T> MineTweetsDeserialized(ITwitterAuthentificationResponse twitterAuthentificationResponse, ITwitterMinerQuery minerQuery, long numberOfTweets, long? sinceId = null)
         {
             return
                 MineTweets(twitterAuthentificationResponse, minerQuery, numberOfTweets)
